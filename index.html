@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0d10" />
+  <title>StemLab — Separazione Stem</title>
+  <meta name="description" content="Separa voce, batteria, basso e strumenti da un brano, interamente nel browser. Nessun upload, nessun costo." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </span>
+      <span class="brand-name">STEM<b>LAB</b></span>
+    </div>
+    <button id="installBtn" class="ghost-btn" hidden>Installa app</button>
+  </header>
+
+  <main class="stage">
+    <!-- PLACEHOLDER BANNER: rimuovi quando colleghi il motore reale -->
+    <div id="demoBanner" class="banner">
+      <strong>Modalità anteprima.</strong> La separazione qui è un segnaposto basato su filtri EQ,
+      serve solo a provare l'interfaccia. Collega Open-Unmix (vedi README) per la separazione AI reale.
+    </div>
+
+    <!-- DROP ZONE -->
+    <section id="dropView" class="panel drop">
+      <input type="file" id="fileInput" accept="audio/*" hidden />
+      <div id="dropZone" class="dropzone" tabindex="0" role="button" aria-label="Carica un brano">
+        <div class="dz-icon" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <h1>Trascina un brano qui</h1>
+        <p>oppure <span class="link">scegli un file</span> — MP3, WAV, FLAC, M4A</p>
+        <p class="fine-print">Il file resta sul tuo dispositivo. Niente upload, niente account.</p>
+      </div>
+    </section>
+
+    <!-- PROCESSING -->
+    <section id="processView" class="panel processing" hidden>
+      <div class="proc-track-name" id="procName">brano.mp3</div>
+      <div class="proc-ring" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52" />
+          <circle id="ringFg" class="ring-fg" cx="60" cy="60" r="52" />
+        </svg>
+        <div class="proc-pct"><span id="procPct">0</span><small>%</small></div>
+      </div>
+      <div class="proc-stage" id="procStage">Decodifica audio…</div>
+      <p class="fine-print" id="procHint"></p>
+    </section>
+
+    <!-- MIXER -->
+    <section id="mixerView" class="panel mixer" hidden>
+      <div class="mixer-head">
+        <div class="mh-name" id="mixName">brano.mp3</div>
+        <button id="newBtn" class="ghost-btn">Nuovo brano</button>
+      </div>
+
+      <div class="transport">
+        <button id="playAll" class="play-btn" aria-label="Play / Pausa">
+          <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="ic-pause" viewBox="0 0 24 24" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        </button>
+        <div class="scrub">
+          <div id="scrubFill" class="scrub-fill"></div>
+          <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Posizione" />
+        </div>
+        <div class="time"><span id="tCur">0:00</span> / <span id="tDur">0:00</span></div>
+      </div>
+
+      <div id="strips" class="strips"><!-- channel strips injected --></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Gira al 100% nel browser · open source</span>
+    <span class="dot">•</span>
+    <span>Modello: Open-Unmix (MIT)</span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
