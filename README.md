@@ -1,4 +1,4 @@
-# StemLab
+# Peel
 
 PWA che separa **voce, batteria, basso e strumenti** da un brano, **interamente nel browser**.
 Nessun upload, nessun server, nessun costo: il file non lascia il dispositivo dell'utente.
