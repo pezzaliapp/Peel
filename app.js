@@ -1,4 +1,4 @@
-/* StemLab — logica applicativa (vanilla JS, nessun build step) */
+/* Peel — logica applicativa (vanilla JS, nessun build step) */
 'use strict';
 
 // Metti true DOPO aver collegato il motore Open-Unmix nel worker (vedi README).

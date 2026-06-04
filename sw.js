@@ -1,4 +1,4 @@
-/* StemLab service worker
+/* Peel service worker
  * Due cache separate:
  *  - APP_SHELL: i file dell'app (piccoli, aggiornati ad ogni release)
  *  - MODEL: i pesi del modello (grandi, ~45 MB, scaricati una volta sola)
@@ -6,8 +6,8 @@
  * La cache del modello NON viene toccata, così l'utente non riscarica i pesi.
  */
 const APP_VERSION = 'v1';
-const APP_CACHE = `stemlab-app-${APP_VERSION}`;
-const MODEL_CACHE = 'stemlab-model'; // volutamente senza versione
+const APP_CACHE = `peel-app-${APP_VERSION}`;
+const MODEL_CACHE = 'peel-model'; // volutamente senza versione
 
 const APP_SHELL = [
   './',
@@ -32,7 +32,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k.startsWith('stemlab-app-') && k !== APP_CACHE)
+          .filter((k) => k.startsWith('peel-app-') && k !== APP_CACHE)
           .map((k) => caches.delete(k))
       )
     )

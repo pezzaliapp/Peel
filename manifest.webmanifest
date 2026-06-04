@@ -1,6 +1,6 @@
 {
-  "name": "StemLab — Separazione Stem",
-  "short_name": "StemLab",
+  "name": "Peel — Separazione Stem",
+  "short_name": "Peel",
   "description": "Separa voce, batteria, basso e strumenti da un brano, interamente nel browser. Nessun upload, nessun costo.",
   "start_url": "./",
   "scope": "./",

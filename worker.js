@@ -1,4 +1,4 @@
-/* StemLab — worker di separazione
+/* Peel — worker di separazione
  * ============================================================
  *  PUNTO D'INTEGRAZIONE DEL MOTORE REALE
  * ============================================================

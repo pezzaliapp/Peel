@@ -15,7 +15,7 @@ nel punto già predisposto.
 ### 1. Provalo in locale (2 minuti)
 I service worker non funzionano aprendo il file direttamente: serve un piccolo server locale.
 ```bash
-cd stemlab
+cd peel
 python3 -m http.server 8080
 ```
 Apri `http://localhost:8080`, trascina un MP3 e vedrai il mixer con i 4 canali.
@@ -25,9 +25,9 @@ Apri `http://localhost:8080`, trascina un MP3 e vedrai il mixer con i 4 canali.
 ```bash
 git init
 git add .
-git commit -m "StemLab: impalcatura iniziale"
+git commit -m "Peel: impalcatura iniziale"
 git branch -M main
-git remote add origin https://github.com/TUO-UTENTE/stemlab.git
+git remote add origin https://github.com/pezzaliapp/Peel.git
 git push -u origin main
 ```
 
@@ -68,7 +68,7 @@ Niente altro da toccare: l'interfaccia, il mixer e l'export funzionano già con 
 ## 📁 Struttura
 
 ```
-stemlab/
+peel/
 ├── index.html              interfaccia
 ├── styles.css              tema studio scuro
 ├── app.js                  logica: decode, mixer, export WAV, anteprima EQ
