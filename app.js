@@ -1,8 +1,11 @@
 /* Peel — logica applicativa (vanilla JS, nessun build step) */
 'use strict';
 
-// Metti true DOPO aver collegato il motore Open-Unmix nel worker (vedi README).
-const USE_REAL_ENGINE = false;
+// Motore Open-Unmix UMX-L (WASM) collegato nel worker. true = separazione AI reale.
+const USE_REAL_ENGINE = true;
+
+// Il modello UMX-L lavora SOLO a 44100 Hz stereo.
+const SAMPLE_RATE = 44100;
 
 const STEMS = [
   { key: 'vocals', name: 'Voce',     short: 'VOX',  color: 'var(--c-vocals)' },
@@ -144,23 +147,62 @@ async function renderFiltered(buf, build) {
   return off.startRendering();
 }
 
-/* ---------- separazione REALE (worker) ---------- */
-function separateReal(buf) {
+/* ---------- separazione REALE (worker + WASM Open-Unmix) ---------- */
+async function separateReal(buf) {
+  // Ricampiona a 44100 Hz stereo qui sul thread principale (i worker non
+  // hanno la Web Audio API). Gli stem torneranno quindi a 44100 Hz.
+  const buf44 = await toStereo44k(buf);
+  const origLen = buf44.length;
+
+  // Il modello va in errore con input molto corti (< ~3s): riempiamo di
+  // silenzio fino a un minimo e ritagliamo gli stem alla lunghezza reale.
+  const MIN_LEN = SAMPLE_RATE * 5;
+  const procLen = Math.max(origLen, MIN_LEN);
+  const channels = [pad(buf44.getChannelData(0), procLen), pad(buf44.getChannelData(1), procLen)];
+
   return new Promise((resolve, reject) => {
     const worker = new Worker('./worker.js');
-    const channels = [];
-    for (let c = 0; c < buf.numberOfChannels; c++) channels.push(buf.getChannelData(c).slice());
     worker.onmessage = (e) => {
       const m = e.data;
-      if (m.type === 'progress') setProgress(8 + m.value * 0.9, 'Separazione AI…');
-      else if (m.type === 'done') { resolve(toBuffers(m.stems, buf.sampleRate)); worker.terminate(); }
+      // Avanzamento inferenza: arriva DAL WASM come { msg:'PROGRESS_UPDATE', data:0..1 }
+      if (m.msg === 'PROGRESS_UPDATE') setProgress(8 + m.data * 90, 'Separazione AI…');
+      else if (m.msg === 'WASM_LOG') { /* console.debug('[umx]', m.data); */ }
+      else if (m.type === 'status') setProgress(8, m.stage);
+      else if (m.type === 'done') { resolve(toBuffers(trimStems(m.stems, origLen), SAMPLE_RATE)); worker.terminate(); }
       else if (m.type === 'error') { reject(new Error(m.message)); worker.terminate(); }
     };
+    worker.onerror = (err) => { reject(new Error(err.message || 'Errore nel worker')); worker.terminate(); };
     worker.postMessage(
-      { type: 'separate', payload: { channels, sampleRate: buf.sampleRate, length: buf.length } },
+      { type: 'separate', payload: { channels, sampleRate: SAMPLE_RATE, length: procLen } },
       channels.map((c) => c.buffer)
     );
   });
+}
+
+// Copia `data` in un nuovo Float32Array lungo `len` (zero-padded se serve).
+function pad(data, len) {
+  if (data.length === len) return data.slice();
+  const out = new Float32Array(len);
+  out.set(data.subarray(0, Math.min(data.length, len)));
+  return out;
+}
+
+// Ritaglia ogni canale di ogni stem alla lunghezza `len`.
+function trimStems(stems, len) {
+  for (const k in stems) stems[k] = stems[k].map((ch) => (ch.length > len ? ch.subarray(0, len) : ch));
+  return stems;
+}
+
+// Ritorna un AudioBuffer a 44100 Hz e 2 canali (up/down-mix automatico Web Audio).
+async function toStereo44k(buf) {
+  if (buf.sampleRate === SAMPLE_RATE && buf.numberOfChannels === 2) return buf;
+  const length = Math.max(1, Math.ceil(buf.duration * SAMPLE_RATE));
+  const off = new OfflineAudioContext(2, length, SAMPLE_RATE);
+  const src = off.createBufferSource();
+  src.buffer = buf;
+  src.connect(off.destination);
+  src.start();
+  return off.startRendering();
 }
 function toBuffers(stems, sr) {
   const out = {};
