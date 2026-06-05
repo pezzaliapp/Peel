@@ -7,6 +7,20 @@ const USE_REAL_ENGINE = true;
 // Il modello UMX-L lavora SOLO a 44100 Hz stereo.
 const SAMPLE_RATE = 44100;
 
+// Rilevamento mobile/iOS. Su Safari iOS l'inferenza WASM tiene in RAM input +
+// 4 stem a piena lunghezza (centinaia di MB su brani lunghi): la tab viene
+// uccisa e si vede "errore ripetuto". Limitiamo la durata processabile.
+const IS_IOS =
+  /iP(hone|ad|od)/.test(navigator.platform) ||
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  // iPadOS recente si maschera da Mac: lo riconosciamo dal touch
+  (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+const IS_MOBILE = IS_IOS || /Android/i.test(navigator.userAgent);
+
+// Durata massima processabile su mobile (secondi). Oltre, blocchiamo con un
+// messaggio chiaro invece di far crashare Safari.
+const MOBILE_MAX_SECS = 90;
+
 const STEMS = [
   { key: 'vocals', name: 'Voce',     short: 'VOX',  color: 'var(--c-vocals)' },
   { key: 'drums',  name: 'Batteria', short: 'DRM',  color: 'var(--c-drums)'  },
@@ -83,11 +97,30 @@ async function handleFile(file) {
     audioBuffer = await ac.decodeAudioData(arrayBuf);
     ac.close();
 
-    // avviso durata su mobile: il motore reale è lento
-    const mins = audioBuffer.duration / 60;
-    if (mins > 6) {
+    const dur = audioBuffer.duration;
+    const mins = dur / 60;
+
+    // Blocco di sicurezza su mobile: oltre MOBILE_MAX_SECS la separazione AI
+    // esaurirebbe la memoria di Safari iOS e farebbe crashare la pagina.
+    // Meglio fermarsi con un messaggio chiaro che lasciar morire la tab.
+    if (IS_MOBILE && dur > MOBILE_MAX_SECS) {
+      show('drop');
+      alert(
+        `Brano troppo lungo per questo dispositivo (${mins.toFixed(1)} min).\n\n` +
+        `Su iPhone/iPad la separazione AI gira interamente in memoria e Safari ` +
+        `non regge brani oltre ~${MOBILE_MAX_SECS}s: la pagina crasherebbe.\n\n` +
+        `Usa un estratto più breve (max ${MOBILE_MAX_SECS}s) oppure apri Peel su computer.`
+      );
+      return;
+    }
+
+    // Avviso pre-elaborazione
+    if (IS_MOBILE) {
       $('procHint').textContent =
-        `Brano lungo (${mins.toFixed(1)} min): con il motore AI reale può richiedere parecchi minuti su mobile.`;
+        `Su mobile l'elaborazione gira tutta in RAM: tieni Peel in primo piano fino al termine.`;
+    } else if (mins > 6) {
+      $('procHint').textContent =
+        `Brano lungo (${mins.toFixed(1)} min): con il motore AI reale può richiedere parecchi minuti.`;
     }
 
     setProgress(8, 'Separazione…');
