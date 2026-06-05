@@ -63,8 +63,15 @@ body {
 .brand-mark i:nth-child(4){ height: 20px; animation-delay: .45s; }
 .brand-mark i:nth-child(5){ height: 7px;  animation-delay: .6s; }
 @keyframes eq { 0%,100%{ transform: scaleY(.5);} 50%{ transform: scaleY(1);} }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
 .brand-name { font-weight: 800; letter-spacing: 2px; font-size: 15px; }
 .brand-name b { color: var(--amber); font-weight: 800; }
+.brand-by {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .5px;
+  color: var(--ink-dim); text-decoration: none; margin-top: 2px;
+  transition: color .15s ease;
+}
+.brand-by:hover { color: var(--amber); }
 
 .ghost-btn {
   font-family: var(--mono); font-size: 12px; color: var(--ink-dim);
