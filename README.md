@@ -80,6 +80,11 @@ peel/
   è il prezzo del "tutto gratis e privato". La UI mostra già un avviso sui brani lunghi.
 - Suggerisci agli utenti di non separare materiale protetto da copyright senza diritto.
   Il rischio è basso (i file restano sul dispositivo), ma un disclaimer è prudente.
+- I risultati migliori si ottengono su **musica registrata in modo tradizionale** (strumenti e
+  voci reali mixati in studio): è il materiale su cui Open-Unmix è stato addestrato. Su brani
+  **generati da AI** (es. Suno) o **molto compressi/masterizzati in modo aggressivo** la
+  separazione può risultare scadente — le sorgenti sono già fuse all'origine o schiacciate dal
+  mastering, e il modello fatica a distinguerle.
 
 ## Autore
 Creato da Alessandro Pezzali — pezzaliapp · https://www.alessandropezzali.it
