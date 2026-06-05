@@ -71,8 +71,9 @@ peel/
 
 ## ⚖️ Licenze
 - **Codice di questa app**: MIT (vedi `LICENSE`).
-- **Pesi del modello**: NON inclusi. Aggiungi Open-Unmix (MIT) e tieni la sua nota
-  di licenza in `models/`. Mantieni sempre l'attribuzione agli autori originali.
+- **Pesi del modello**: inclusi in `models/`, sotto licenza Open-Unmix (MIT) e addestrati
+  sul dataset aperto MUSDB18-HQ. Sono scaricati dal browser alla prima apertura (~44 MB, poi
+  tenuti in cache) e l'attribuzione agli autori originali è sempre mantenuta.
 
 ## ⚠️ Note pratiche
 - La separazione AI nel browser è **lenta** (alcuni minuti a brano, di più su mobile):

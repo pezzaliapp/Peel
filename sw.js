@@ -5,7 +5,7 @@
  * Cambia APP_VERSION ad ogni release per invalidare la cache dell'app.
  * La cache del modello NON viene toccata, così l'utente non riscarica i pesi.
  */
-const APP_VERSION = 'v1';
+const APP_VERSION = 'v2';
 const APP_CACHE = `peel-app-${APP_VERSION}`;
 const MODEL_CACHE = 'peel-model'; // volutamente senza versione
 
@@ -29,15 +29,29 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((k) => k.startsWith('peel-app-') && k !== APP_CACHE)
-          .map((k) => caches.delete(k))
-      )
-    )
+    (async () => {
+      // Elimina SOLO le vecchie cache dell'app (peel-app-*). La cache dei pesi
+      // del modello (peel-model, senza versione) NON viene mai toccata qui.
+      const keys = await caches.keys();
+      const oldAppCaches = keys.filter(
+        (k) => k.startsWith('peel-app-') && k !== APP_CACHE
+      );
+      await Promise.all(oldAppCaches.map((k) => caches.delete(k)));
+
+      // Prendi subito il controllo delle pagine già aperte.
+      await self.clients.claim();
+
+      // Se c'era una versione precedente (cioè è un aggiornamento, non il
+      // primo install), ricarica una volta sola le pagine aperte così che
+      // applichino subito la nuova versione dell'app.
+      if (oldAppCaches.length > 0) {
+        const clients = await self.clients.matchAll({ type: 'window' });
+        for (const client of clients) {
+          client.navigate(client.url).catch(() => {});
+        }
+      }
+    })()
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
