@@ -3,10 +3,10 @@
 PWA che separa **voce, batteria, basso e strumenti** da un brano, **interamente nel browser**.
 Nessun upload, nessun server, nessun costo: il file non lascia il dispositivo dell'utente.
 
-Questa è l'**impalcatura completa e funzionante**: interfaccia, mixer, PWA installabile,
-service worker, export WAV. La separazione parte in **modalità anteprima** (segnaposto a filtri EQ)
-così puoi provare subito tutto. Il motore AI reale (Open-Unmix) si collega in un secondo momento,
-nel punto già predisposto.
+App **completa e funzionante**: interfaccia, mixer, PWA installabile, service worker, export WAV.
+Il **motore AI reale Open-Unmix UMX-L è già attivo** (`USE_REAL_ENGINE = true`): gira via
+**WebAssembly, interamente client-side**. I pesi del modello (~44 MB) si scaricano **una volta sola**
+alla prima apertura e restano poi in cache per l'uso offline.
 
 ---
 
@@ -19,7 +19,7 @@ cd peel
 python3 -m http.server 8080
 ```
 Apri `http://localhost:8080`, trascina un MP3 e vedrai il mixer con i 4 canali.
-(In anteprima i canali sono filtrati per EQ, non separati dall'AI: è normale.)
+(Alla prima apertura il modello Open-Unmix UMX-L, ~44 MB, viene scaricato una sola volta.)
 
 ### 2. Crea la repo su GitHub
 ```bash
@@ -40,28 +40,17 @@ Due opzioni, entrambe a costo zero:
 
 È un sito statico: nessuna build, nessun backend.
 
-### 4. Collega il motore reale (Open-Unmix)
-Questo è l'unico passaggio "tecnico". Vedi la sezione sotto.
-Finché non lo fai, l'app resta in modalità anteprima ed è già installabile e usabile come demo.
-
 ---
 
-## 🔌 Collegare Open-Unmix (separazione AI vera)
+## 🔌 Motore AI: Open-Unmix UMX-L (già attivo)
+
+Il motore reale è **già collegato e in funzione** (`USE_REAL_ENGINE = true` in `app.js`):
+la separazione avviene con **Open-Unmix UMX-L** eseguito via **WebAssembly nel browser**,
+senza alcun server.
 
 Open-Unmix (UMX-L) è scelto perché è **MIT su codice e pesi** ed è addestrato sul dataset
-aperto MUSDB18-HQ: la strada legalmente più pulita.
-
-1. Procurati il modulo WASM e i pesi. Punto di partenza MIT: il progetto `umx.cpp`
-   (transpilazione C++ di Open-Unmix, compilabile in WASM con Emscripten). Cerca
-   `sevagh/umx.cpp` e `free-music-demixer` su GitHub.
-2. Metti i file generati in una cartella `models/` (es. `models/umx.js`, `models/umx.wasm`,
-   `models/umxl-ggml.bin`). Il service worker li mette già in cache persistente.
-3. In `worker.js` carica il glue Emscripten e implementa `runRealSeparation()`
-   (c'è già lo scheletro con i TODO).
-4. In `app.js` cambia `USE_REAL_ENGINE = false` → `true`.
-5. Aggiungi in `models/` un file `LICENSE` con la licenza dei pesi e l'attribuzione agli autori.
-
-Niente altro da toccare: l'interfaccia, il mixer e l'export funzionano già con l'output reale.
+aperto MUSDB18-HQ: la strada legalmente più pulita. I pesi (~44 MB) si scaricano **una volta
+sola** alla prima apertura e il service worker li tiene in cache persistente per l'uso offline.
 
 ---
 
@@ -71,8 +60,8 @@ Niente altro da toccare: l'interfaccia, il mixer e l'export funzionano già con 
 peel/
 ├── index.html              interfaccia
 ├── styles.css              tema studio scuro
-├── app.js                  logica: decode, mixer, export WAV, anteprima EQ
-├── worker.js               ← punto d'integrazione del motore AI
+├── app.js                  logica: decode, mixer, export WAV (USE_REAL_ENGINE = true)
+├── worker.js               motore AI: Open-Unmix UMX-L via WebAssembly
 ├── sw.js                   service worker (offline + cache del modello)
 ├── manifest.webmanifest    PWA
 ├── icons/                  icone app
