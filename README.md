@@ -80,3 +80,6 @@ peel/
   è il prezzo del "tutto gratis e privato". La UI mostra già un avviso sui brani lunghi.
 - Suggerisci agli utenti di non separare materiale protetto da copyright senza diritto.
   Il rischio è basso (i file restano sul dispositivo), ma un disclaimer è prudente.
+
+## Autore
+Creato da Alessandro Pezzali — pezzaliapp · https://www.alessandropezzali.it
